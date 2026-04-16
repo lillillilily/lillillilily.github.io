@@ -386,7 +386,7 @@ textarea { min-height:68px; resize:vertical; }
 // ════════════════════════════════
 // CONFIG
 // ════════════════════════════════
-const APPS_SCRIPT_WEBAPP_URL = 'https://script.google.com/macros/s/AKfycbw8Nvq3bbXkSns_cf1A6K8LUR47qQpGlryORTslGkFHqAPPPP7yTYqRUx6XYQ4YCNgI6w/exec';
+const APPS_SCRIPT_WEBAPP_URL = 'https://script.google.com/macros/s/AKfycbx7wqQgq-xOIuueLoNtRdtuZTeq0fSWHEswQBn-F0fESmPkMPblZ6mUQgEpUdliSSF9/exec';
 
 const CONFIG = {
   studyId: 'exp1_scene_perception',
@@ -1014,7 +1014,6 @@ function buildTrialPage(slotId, dispIdx, total, assignment) {
   page.innerHTML = `
     <div class="trial-hdr">
       <span class="trial-num" data-role="trial-num">${t('trialCounter', { idx: dispIdx + 1, total })}</span>
-      <span class="trial-badge" data-role="trial-badge">${t('trialBadge', { blurId: assignment.blurId, sceneNumber: assignment.sceneNumber })}</span>
     </div>
 
     <div style="margin-bottom:22px">
@@ -1099,7 +1098,7 @@ function renderTrialPages(groupId, participantId = getParticipantId()) {
     const imgBox = document.getElementById(`imgbox-${slotId}`);
     if (imgBox) imgBox.innerHTML = `
        <img src="${assignment.imagePath}" alt="image ${i + 1}"
-         onerror="this.parentElement.innerHTML='<div class=\\'ph\\'>${t('loadFail')}</div><div class=\\'fn\\'>${assignment.imagePath}</div>'">
+         onerror="this.parentElement.innerHTML='<div class=\\'ph\\'>${t('loadFail')}</div>'">
     `;
   });
 
@@ -1111,13 +1110,8 @@ function refreshDynamicI18n() {
     const page = document.getElementById(`page-${i + 1}`);
     if (!page) return;
 
-    const assignment = trialAssignments[id];
     const total = MAIN_IDS.length;
     page.querySelector('[data-role="trial-num"]').textContent = t('trialCounter', { idx: i + 1, total });
-    page.querySelector('[data-role="trial-badge"]').textContent = t('trialBadge', {
-      blurId: assignment?.blurId || '',
-      sceneNumber: assignment?.sceneNumber || i + 1
-    });
     page.querySelector('[data-role="q1-label"]').innerHTML = t('q1Label');
     page.querySelector('[data-role="q1-hint"]').textContent = t('q1Hint');
     page.querySelector('[data-role="q1-still"]').textContent = t('q1Still');
@@ -1269,7 +1263,7 @@ function updateProgress() {
 // ════════════════════════════════
 // PAYLOAD
 // ════════════════════════════════
-function collectPayload() {
+function collectPayload(completionCode = null) {
   return {
     study_id: CONFIG.studyId,
     meta: {
@@ -1277,7 +1271,8 @@ function collectPayload() {
       participant_id: getParticipantId(),
       worker_id: getParticipantId(),
       group_id: window._groupId ?? null,
-      experience: document.querySelector('[name="exp"]:checked')?.value || null
+      experience: document.querySelector('[name="exp"]:checked')?.value || null,
+      completion_code: completionCode || null
     },
     trials: MAIN_IDS.map(id => ({
       ...(function () {
@@ -1421,7 +1416,10 @@ async function submitPayloadToBackend(payload) {
 }
 
 async function handleSubmit() {
-  const payload = collectPayload();
+  // Generate completion code before submission
+  const completionCode = String(Math.floor(100000 + Math.random() * 900000));
+  
+  const payload = collectPayload(completionCode);
   const submitBtn = document.getElementById('btn-submit-final');
   const prevBtn = document.getElementById('btn-prev-final');
 
@@ -1452,6 +1450,13 @@ async function handleSubmit() {
   setSubmitStatus('', 'ok');
   document.querySelector('.sticky').style.display = 'none';
   document.querySelectorAll('.page').forEach(p => p.style.display = 'none');
+  
+  // Display the same completion code that was submitted
+  const codeEl = document.getElementById('completion-code');
+  if (codeEl) {
+    codeEl.textContent = completionCode;
+  }
+  
   document.getElementById('thankyou').style.display = 'block';
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
