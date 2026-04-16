@@ -240,8 +240,7 @@ textarea { min-height:68px; resize:vertical; }
 .nav-hint { font-family:var(--mono); font-size:10px; color:var(--muted); text-align:center; margin-top:10px; min-height:16px; }
 
 /* thankyou */
-#thankyou { display:none; text-align:center; padding:64px 0; }
-#thankyou .check { font-size:40px; margin-bottom:16px; }
+#thankyou { display:none; }
 #thankyou h2 { font-size:21px; font-weight:600; margin-bottom:10px; }
 #thankyou p { font-size:13px; color:var(--muted); line-height:1.7; }
 </style>
@@ -375,14 +374,16 @@ textarea { min-height:68px; resize:vertical; }
   <div id="submit-status" class="status-box" style="margin-top:12px"></div>
 </div>
 
-<div id="thankyou">
-  <div class="check">✓</div>
-  <h2 id="thankyou-title">참여해주셔서 감사합니다</h2>
-  <p id="thankyou-msg">응답이 정상적으로 저장되었습니다.<br>식별자를 메모해두셨다면 같은 번호로 재접속해 응답을 수정할 수 있습니다.</p>
-  <div style="margin-top: 32px; padding: 20px; background: var(--accent-light); border: 1px solid #BAD4C6; border-radius: var(--radius);">
-    <p style="font-size: 11px; color: var(--muted); margin-bottom: 8px; font-family: var(--mono); text-transform: uppercase; letter-spacing: .08em;">Completion Code</p>
-    <div style="font-family: var(--mono); font-size: 32px; font-weight: 600; color: var(--accent); letter-spacing: 0.1em; word-spacing: 0.2em;" id="completion-code">------</div>
-    <p style="font-size: 11px; color: var(--muted); margin-top: 12px;">mTurk에 위 코드를 입력해주세요.</p>
+<div class="page" id="thankyou">
+  <div style="text-align:center; padding:64px 0;">
+    <div style="font-size:40px; margin-bottom:16px;">✓</div>
+    <h2 id="thankyou-title" style="font-size:21px; font-weight:600; margin-bottom:10px;">참여해주셔서 감사합니다</h2>
+    <p id="thankyou-msg" style="font-size:13px; color:var(--muted); line-height:1.7; margin-bottom:32px;">응답이 정상적으로 저장되었습니다.<br>식별자를 메모해두셨다면 같은 번호로 재접속해 응답을 수정할 수 있습니다.</p>
+    <div style="padding: 20px; background: var(--accent-light); border: 1px solid #BAD4C6; border-radius: var(--radius);">
+      <p style="font-size: 11px; color: var(--muted); margin-bottom: 8px; font-family: var(--mono); text-transform: uppercase; letter-spacing: .08em;">Completion Code</p>
+      <div style="font-family: var(--mono); font-size: 32px; font-weight: 600; color: var(--accent); letter-spacing: 0.1em; word-spacing: 0.2em;" id="completion-code">------</div>
+      <p style="font-size: 11px; color: var(--muted); margin-top: 12px;">mTurk에 위 코드를 입력해주세요.</p>
+    </div>
   </div>
 </div>
 
@@ -1454,15 +1455,18 @@ async function handleSubmit() {
   persistDraft(true);
   setSubmitStatus('', 'ok');
   document.querySelector('.sticky').style.display = 'none';
-  document.querySelectorAll('.page').forEach(p => p.style.display = 'none');
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   
   // Display the same completion code that was submitted
   const codeEl = document.getElementById('completion-code');
+  console.log('Completion code:', completionCode);
+  console.log('Code element:', codeEl);
   if (codeEl) {
     codeEl.textContent = completionCode;
+    console.log('Code set to:', codeEl.textContent);
   }
   
-  document.getElementById('thankyou').style.display = 'block';
+  document.getElementById('thankyou').classList.add('active');
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
